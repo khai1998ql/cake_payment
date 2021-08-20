@@ -21,5 +21,4 @@
 		$stt++;
 	}
 	$this->PhpExcel->output('Danh-sach-san-pham.xlsx');
-
 ?>

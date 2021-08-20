@@ -16,7 +16,7 @@
 						<form class="bill_customer_form" action="" method="POST" id="bill_customer_form">
 							<input type="text" id="phone_number" <?php if($this->Session->read('data.data_customer.user_text')) : ?> value="<?php echo $this->Session->read('data.data_customer.user_text'); ?>"  <?php endif; ?> name="phone_number" placeholder="Nhập sđt khách hàng" style="width: 250px;">
 							<div style="margin: 0 10px; margin-top: 5px; cursor: pointer;" title="Xóa" onclick="deleteCustomer()"><i class="fas fa-times" style="background-color: black; color: red; font-size: 20px; width: 20px; height: 20px;"></i></div>
-							<button type="submit" class="btn btn-sm btn-primary">Submit</button>
+							<button type="submit" class="btn btn-sm btn-danger">Submit</button>
 						</form>
 					</div>
 					<div class="bill_search_product">
@@ -24,10 +24,10 @@
 							<input type="text" id="product_barcode" name="product_barcode" placeholder="Nhập mã vạch sản phẩm">
 							<input type="number" id="product_qty" name="product_qty" value="1" class="ml-3" style="width: 50px;">
 							<div style="margin: 0 10px; margin-top: 5px; cursor: pointer;" title="Xóa" onclick="deleteBarcode()"><i class="fas fa-times" style="background-color: black; color: red; font-size: 20px; width: 20px; height: 20px;"></i></div>
-							<button type="submit" class="btn btn-sm btn-primary">Submit</button>
+							<button type="submit" class="btn btn-sm btn-danger">Submit</button>
 						</form>
 					</div>
-					<div class="bill_product mt-3">
+					<div class="bill_product mt-1">
 						<table class="table">
 							<thead>
 								<tr>
@@ -36,20 +36,24 @@
 									<th scope="col">Số lượng</th>
 									<th scope="col">Đơn giá</th>
 									<th scope="col">Thành tiền</th>
+									<th scope="col">Hành động</th>
 								</tr>
 							</thead>
 							<tbody id="bill_product_table">
 								<?php if($this->Session->read('data.data_products')) :  ?>
 									<?php foreach ($this->Session->read('data.data_products') as $key => $item) : ?>
-									<tr>
+									<tr id="row_<?php echo $key; ?>">
 										<td><?php echo $item['barcode'] ?></td>
 										<td><?php echo $item['product_name'] ?></td>
 <!--										<td>--><?php //echo $item['product_qty'] ?><!--</td>-->
-										<td><input type="number" value="<?php echo $item['product_qty'] ?>" id="<?php echo $key; ?>" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>
-										<td><?php echo $this->Lib->formatPrice($item['product_price']); ?></td>
-										<td><?php echo $this->Lib->formatPrice($item['single_price']); ?></td>
+										<td><input type="number" min="1" value="<?php echo $item['product_qty'] ?>" id="number_<?php echo $key; ?>" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>
+										<td id="product_price_<?php echo $key; ?>"><?php echo $this->Lib->formatPrice($item['product_price']); ?></td>
+										<td id="single_price_<?php echo $key; ?>"><?php echo $this->Lib->formatPrice($item['single_price']); ?></td>
+										<td><span class="btn btn-sm btn-danger" style="cursor: pointer" id="delete_<?php echo $key; ?>" onclick="onDeleteProduct(this.id)">Xóa</span></td>
 									</tr>
 									<?php endforeach; ?>
+								<?php else: ?>
+
 								<?php endif; ?>
 							</tbody>
 
@@ -70,7 +74,12 @@
 			<div class="col-4">
 				<div class="customer_money">
 					<div class="customer_money_text">Tiền khách đưa</div>
-					<input type="number" value="0">
+					<div class="d-flex">
+						<input type="text" value="" id="customer_money">
+						<div style="margin: 0 10px; margin-top: 5px; cursor: pointer;" title="Xóa" onclick="deleteMoney()"><i class="fas fa-times" style="background-color: black; color: red; font-size: 20px; width: 20px; height: 20px;"></i></div>
+						<span class="btn btn-sm btn-danger" style="cursor: pointer" onclick="onCustomerMoney()">Submit</span>
+					</div>
+
 				</div>
 				<div class="customer_money">
 					<div class="customer_money_text">Tiền khách phải thanh toán</div>
@@ -84,11 +93,13 @@
 				</div>
 				<div class="customer_money">
 					<div class="customer_money_text">Trả lại khách</div>
-					<div class="customer_money_number">0 VND</div>
+					<div class="customer_money_number" id="refund_customer">0 VND</div>
 				</div>
 				<div class="bill_action">
-					<span class="btn btn-danger">HỦY HÓA ĐƠN</span>
-					<span class="btn btn-success">HOÀN THÀNH</span>
+					<span class="btn btn-danger" style="cursor: pointer;" onclick="destroyBill()">HỦY HÓA ĐƠN</span>
+					<?php echo $this->HTML->link('HOÀN THÀNH',
+							array('controller' => 'bills', 'action' => 'index', '?xuat_excel=1'),
+							array('class' => 'btn btn-success')) ?>
 				</div>
 			</div>
 
@@ -111,7 +122,6 @@
 				type : "GET",
 				dataType : 'json',
 				success:function (data){
-					console.log(data);
 					if (data.data_toastr.type == 'success'){
 						toastr.success(data.data_toastr.message);
 						$('#phone_number').val(data.user_text);
@@ -138,12 +148,13 @@
 							$('#bill_product_table').empty();
 							toastr.success(data.data_toastr.message);
 							$.each(data.data_products, function (key, item){
-								$('#bill_product_table').append("<tr>"+
-									"<td>"+ item.barcode +"</td>" +
-									"<td>"+ item.product_name +"</td>" +
-									"<td>"+ item.product_qty +"</td>" +
-									"<td>"+String(item.product_price).replace(/(.)(?=(\d{3})+$)/g,'$1,') +" VND</td>" +
-									"<td>"+String(item.product_price * item.product_qty).replace(/(.)(?=(\d{3})+$)/g,'$1,') +" VND</td>" +
+								$('#bill_product_table').append('<tr id="row_'+ key + '">'+
+									'<td>'+ item.barcode +'</td>' +
+									'<td>'+ item.product_name +'</td>' +
+									'<td><input type="number" min="1" value="'+ item.product_qty +'" id="number_'+ key + '" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>' +
+									'<td id="product_price_'+ key + '">'+String(item.product_price).replace(/(.)(?=(\d{3})+$)/g,"$1,") +' VND</td>' +
+									'<td id="single_price_'+ key + '">'+String(item.product_price * item.product_qty).replace(/(.)(?=(\d{3})+$)/g,"$1,") +' VND</td>' +
+									'<td><span class="btn btn-sm btn-danger" style="cursor: pointer" id="delete_'+ key + '" onclick="onDeleteProduct(this.id)">Xóa</span></td>' +
 								"</tr>");
 							});
 
@@ -178,7 +189,76 @@
 		$('#product_barcode').val('');
 		$('#product_qty').val(1);
 	}
-	function onChangeQty($id){
-		console.log($id);
+	function onChangeQty(id){
+		var product_key = parseInt(id.substr(7));
+		var product_qty = parseInt($('#'+id).val());
+		if(!product_qty){
+			product_qty = 1;
+			$('#'+id).val(1);
+		}
+		$.ajax({
+			url: '/training_cake/payment/bills/changeQty/' + product_key + '/' + product_qty,
+			type: 'GET',
+			dataType: 'json',
+			success:function (data){
+				$('#single_price_'+product_key).html(String(parseInt(data.single_price_new)).replace(/(.)(?=(\d{3})+$)/g,"$1,") + " VNĐ");
+				$('#bill_payment_number').html(String(data.data_totalPrice_new).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+				$('#customer_money_number').html(String(data.data_totalPrice_new).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+			}
+		})
+	}
+	function onDeleteProduct(id){
+		var product_key = parseInt(id.substr(7));
+		// $('#row_' + product_key).remove();
+		$.ajax({
+			url: '/training_cake/payment/bills/deleteProduct/' + product_key,
+			type: 'GET',
+			dataType: 'json',
+			success:function (data){
+				$('#bill_payment_number').html(String(data.data_totalPrice_new).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+				$('#customer_money_number').html(String(data.data_totalPrice_new).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+				$('#row_' + product_key).remove();
+			}
+		})
+	}
+	function deleteMoney(){
+		$('#customer_money').val('');
+	}
+	function onCustomerMoney(){
+		var customer_money = parseInt($('#customer_money').val());
+		if(customer_money){
+			$('#customer_money').val(String(customer_money).replace(/(.)(?=(\d{3})+$)/g,'$1,'));
+		}
+
+		$.ajax({
+			url: '/training_cake/payment/bills/moneyCustomer/' + customer_money,
+			type: 'GET',
+			dataType: 'json',
+			success:function (data){
+				$('#customer_money_number').html(String(data.data_totalPrice_old).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+				$('#refund_customer').html(String(data.refund_pay).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+			}
+		})
+	}
+	function destroyBill(){
+		$('#bill_product_table').html('');
+		$('#phone_number').val('');
+		$('#product_barcode').val('');
+		$('#product_qty').val(1);
+		$('#customer_money').val('');
+		$('#bill_payment_number').html(String(0).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+		$('#customer_money_number').html(String(0).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+		$('#refund_customer').html(String(0).replace(/(.)(?=(\d{3})+$)/g,'$1,') + " VNĐ");
+		$.ajax({
+			url: '/training_cake/payment/bills/destroyBill',
+			type: 'GET',
+			dataType: 'json',
+			success:function (data){
+				console.log(data);
+				if(data.type == 'success'){
+					toastr.success(data.message);
+				}
+			}
+		})
 	}
 </script>

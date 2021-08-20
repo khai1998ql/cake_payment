@@ -14,4 +14,8 @@ class LibHelper extends AppHelper {
 		$number = intval($number);
 		return $number = number_format($number, 0, '.', ',') . ' VNĐ';
 	}
+	public function formatPriceNot($number){
+		$number = intval($number);
+		return $number = number_format($number, 0, '.', ',');
+	}
 }

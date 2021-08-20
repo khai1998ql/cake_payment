@@ -128,6 +128,7 @@ class UsersController extends AppController {
 	public function getCustomer($phone_number){
 		$this->layout = null;
 		$user = $this->User->findByPhoneNumber($phone_number);
+
 		$data_customer = array();
 		if(!empty($user)){
 			$data = array(
@@ -140,6 +141,7 @@ class UsersController extends AppController {
 				'data_toastr' => $data,
 			);
 			$this->Session->write('data.data_customer', $data_customer);
+			$this->set('data', $this->Session->read('data.data_customer'));
 		}else{
 			$data = array(
 				'type' => 'error',
@@ -148,13 +150,15 @@ class UsersController extends AppController {
 			$data_customer = array(
 				'data_toastr' => $data,
 			);
-			$this->Session->delete('data.data_customer');
-			$this->Session->write('data.data_customer', $data_customer);
+//			$this->Session->delete('data.data_customer');
+//			$this->Session->write('data.data_customer', $data_customer);
+			$this->set('data', $data_customer);
 		}
+//		$this->Session->write('data.data_customer', $data_customer);
 //		debug($data_customer);die;
 
 //		return json_encode($data);
 //		debug($this->Session->read('data.data_customer'));
-		$this->set('data', $this->Session->read('data.data_customer'));
+//		$this->set('data', $this->Session->read('data.data_customer'));
 	}
 }

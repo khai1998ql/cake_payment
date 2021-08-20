@@ -95,12 +95,14 @@
 					$count_qty = 0;
 					$number_qty = intval($number);
 					$check_barcode = false;
+					$last_key = 0;
 					foreach ($data_products as $key => $item){
 						if($item['barcode'] == $barcode){
 							$count_qty = $key;
 							$number_qty += intval($item['product_qty']);
 							$check_barcode = true;
 						}
+						$last_key = intval($key);
 					}
 					if($check_barcode){
 						$data_products[$count_qty] = array(
@@ -113,7 +115,7 @@
 							'single_price' => intval($product['Product']['product_price']) * $number_qty,
 						);
 					}else{
-						$data_products[count($data_products) + 1] = array(
+						$data_products[$last_key + 1] = array(
 							'id' => $product['Product']['id'],
 							'product_name' => $product['Product']['product_name'],
 							'product_price' => intval($product['Product']['product_price']),
@@ -144,7 +146,10 @@
 					'data_toastr' => $data_toastr,
 					'data_totalPrice' => $total_price,
 				);
-				$this->Session->write('data', $data);
+//				$this->Session->write('data', $data);
+				$this->Session->write('data.data_products', $data_products);
+				$this->Session->write('data.data_toastr', $data_toastr);
+				$this->Session->write('data.data_totalPrice', $total_price);
 			}else{
 				$data = array(
 					'data_toastr' => $data_toastr,
