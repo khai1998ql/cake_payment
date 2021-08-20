@@ -127,5 +127,10 @@
 			);
 			$this->set('data', $data);
 		}
+		public function view(){
+			$bills = $this->Bill->find('all');
+//			debug($bills);die;
+			$this->set('bills', $bills);
+		}
 	}
 ?>
