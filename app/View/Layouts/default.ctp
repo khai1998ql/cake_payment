@@ -51,7 +51,7 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 			<?php
 				if(AuthComponent::user() && AuthComponent::user('role') == 2) : ?>
 			<nav class="navbar navbar-expand-lg navbar-dark  bg-dark">
-				<?php echo $this->HTML->link('Trang chủ', array('controller' => 'users', 'action' => 'index'), array('class' => 'navbar-brand')) ?>
+				<?php echo $this->HTML->link('Trang chủ', array('controller' => 'staffs', 'action' => 'index'), array('class' => 'navbar-brand')) ?>
 				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 					<span class="navbar-toggler-icon"></span>
 				</button>

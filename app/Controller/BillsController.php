@@ -132,5 +132,13 @@
 //			debug($bills);die;
 			$this->set('bills', $bills);
 		}
+		public function detail($id){
+			$detail = $this->Bill->findById($id);
+			foreach ($detail['Detail'] as $key => $item){
+				$product = $this->Bill->Detail->Product->query("SELECT * FROM `products` where id = " . $item['product_id']);
+				$detail['Detail'][$key]['product'] = $product[0]['products'];
+			}
+			$this->set('detail', $detail);
+		}
 	}
 ?>

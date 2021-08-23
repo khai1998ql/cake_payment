@@ -1,3 +1,6 @@
+<?php
+//	debug($bills);die;
+?>
 <div class="container mt-4">
 	<div>
 		<h1 style="font-size: 25px;color: red;font-weight: 700;display: inline;">Quản lý hóa đơn</h1>
@@ -34,8 +37,8 @@
 					<td><?php echo $this->Lib->formatPrice($bill['Bill']['total_bill']); ?></td>
 					<td><?php echo $bill['Bill']['created']; ?></td>
 					<td>
-						<?php echo $this->HTML->link('Xem', array('controller' => 'products', 'action' => 'view', $bill['Bill']['id']), array('class' => 'btn btn-success')) ?>
-						<?php echo $this->Form->postLink('Xóa', array('controller' => 'products', 'action' => 'delete', $bill['Bill']['id']), array('class' => 'btn btn-warning')) ?>
+						<?php echo $this->HTML->link('Xem', array('controller' => 'bills', 'action' => 'detail', $bill['Bill']['id']), array('class' => 'btn btn-success')) ?>
+						<?php echo $this->Form->postLink('Xóa', array('controller' => 'bills', 'action' => 'delete', $bill['Bill']['id']), array('class' => 'btn btn-warning')) ?>
 					</td>
 				</tr>
 				<?php
