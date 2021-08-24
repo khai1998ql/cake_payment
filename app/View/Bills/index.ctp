@@ -46,7 +46,7 @@
 										<td><?php echo $item['barcode'] ?></td>
 										<td><?php echo $item['product_name'] ?></td>
 <!--										<td>--><?php //echo $item['product_qty'] ?><!--</td>-->
-										<td><input type="number" min="1" value="<?php echo $item['product_qty'] ?>" id="number_<?php echo $key; ?>" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>
+										<td><input type="number" min="1" max="<?php echo $item['product_qty_max'] ?>" value="<?php echo $item['product_qty'] ?>" id="number_<?php echo $key; ?>" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>
 										<td id="product_price_<?php echo $key; ?>"><?php echo $this->Lib->formatPrice($item['product_price']); ?></td>
 										<td id="single_price_<?php echo $key; ?>"><?php echo $this->Lib->formatPrice($item['single_price']); ?></td>
 										<td><span class="btn btn-sm btn-danger" style="cursor: pointer" id="delete_<?php echo $key; ?>" onclick="onDeleteProduct(this.id)">Xóa</span></td>
@@ -146,12 +146,16 @@
 						console.log(data);
 						if(data.data_toastr.type == 'success'){
 							$('#bill_product_table').empty();
-							toastr.success(data.data_toastr.message);
+							if(data.data_toastr.toastr == 'success'){
+								toastr.success(data.data_toastr.message);
+							}else{
+								toastr.error(data.data_toastr.message);
+							}
 							$.each(data.data_products, function (key, item){
 								$('#bill_product_table').append('<tr id="row_'+ key + '">'+
 									'<td>'+ item.barcode +'</td>' +
 									'<td>'+ item.product_name +'</td>' +
-									'<td><input type="number" min="1" value="'+ item.product_qty +'" id="number_'+ key + '" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>' +
+									'<td><input type="number" min="1" max="'+ item.product_qty_max +'" value="'+ item.product_qty +'" id="number_'+ key + '" onchange="onChangeQty(this.id)" class="bill_product_table_input"></td>' +
 									'<td id="product_price_'+ key + '">'+String(item.product_price).replace(/(.)(?=(\d{3})+$)/g,"$1,") +' VND</td>' +
 									'<td id="single_price_'+ key + '">'+String(item.product_price * item.product_qty).replace(/(.)(?=(\d{3})+$)/g,"$1,") +' VND</td>' +
 									'<td><span class="btn btn-sm btn-danger" style="cursor: pointer" id="delete_'+ key + '" onclick="onDeleteProduct(this.id)">Xóa</span></td>' +
@@ -192,10 +196,13 @@
 	function onChangeQty(id){
 		var product_key = parseInt(id.substr(7));
 		var product_qty = parseInt($('#'+id).val());
+		var product_qty_max = parseInt($('#'+id).attr('max'));
 		if(!product_qty){
 			product_qty = 1;
 			$('#'+id).val(1);
 		}
+		product_qty = (product_qty <= product_qty_max) ? product_qty : product_qty_max;
+		$('#'+id).val(product_qty);
 		$.ajax({
 			url: '/training_cake/payment/bills/changeQty/' + product_key + '/' + product_qty,
 			type: 'GET',

@@ -68,7 +68,6 @@ $cakeVersion = __d('cake_dev', 'CakePHP %s', Configure::version())
 						</li>
 						<li class="nav-item active">
 							<?php echo $this->HTML->link('Quản lý đơn hàng', array('controller' => 'bills', 'action' => 'view'), array('class' => 'nav-link')) ?>
-
 						</li>
 					</ul>
 					<div class="form-inline my-2 my-lg-0">

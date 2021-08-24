@@ -79,16 +79,22 @@
 			$this->layout = null;
 			$product = $this->Product->findByBarcode($barcode);
 			$total_price = array();
+//			$check_number = true;
 			if(!empty($product)){
+
 				if(!$this->Session->read('data.data_products')){
+					$check_number = (intval($number) <= intval($product['Product']['number']));
+					$number_qty = (intval($number) <= intval($product['Product']['number'])) ? intval($number) : intval($product['Product']['number']);
+
 					$data_products[1] = array(
 						'id' => $product['Product']['id'],
 						'product_name' => $product['Product']['product_name'],
 						'product_price' => intval($product['Product']['product_price']),
 						'barcode' => $product['Product']['barcode'],
 						'discount' => intval($product['Product']['discount']),
-						'product_qty' => intval($number),
+						'product_qty' => $number_qty,
 						'single_price' => intval($product['Product']['product_price']) * intval($number),
+						'product_qty_max' => intval($product['Product']['number']),
 					);
 				}else{
 					$data_products = $this->Session->read('data.data_products');
@@ -104,6 +110,9 @@
 						}
 						$last_key = intval($key);
 					}
+					$check_number = (intval($number_qty) <= intval($product['Product']['number']));
+					$number_qty = (intval($number_qty) <= intval($product['Product']['number'])) ? intval($number_qty) :intval($product['Product']['number']);
+
 					if($check_barcode){
 						$data_products[$count_qty] = array(
 							'id' => $product['Product']['id'],
@@ -113,6 +122,7 @@
 							'discount' => intval($product['Product']['discount']),
 							'product_qty' => $number_qty,
 							'single_price' => intval($product['Product']['product_price']) * $number_qty,
+							'product_qty_max' => intval($product['Product']['number']),
 						);
 					}else{
 						$data_products[$last_key + 1] = array(
@@ -121,15 +131,27 @@
 							'product_price' => intval($product['Product']['product_price']),
 							'barcode' => $product['Product']['barcode'],
 							'discount' => intval($product['Product']['discount']),
-							'product_qty' => intval($number),
+							'product_qty' => $number_qty,
 							'single_price' => intval($product['Product']['product_price']) * intval($number),
+							'product_qty_max' => intval($product['Product']['number']),
 						);
 					}
 				}
-				$data_toastr = array(
-					'type' => 'success',
-					'message' => 'Thêm sản phẩm thành công!'
-				);
+//				debug($check_number);die;
+				if($check_number){
+					$data_toastr = array(
+						'type' => 'success',
+						'toastr' => 'success',
+						'message' => 'Thêm sản phẩm thành công!'
+					);
+				}else{
+					$data_toastr = array(
+						'type' => 'success',
+						'toastr' => 'error',
+						'message' => 'Chỉ được mua giới hạn ' . $product['Product']['number'] . ' sản phẩm!',
+					);
+				}
+
 				$total_price = 0;
 				foreach ($data_products as $data_product) {
 					$total_price += intval($data_product['single_price']);

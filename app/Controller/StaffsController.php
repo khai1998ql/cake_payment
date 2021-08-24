@@ -10,6 +10,7 @@ class StaffsController extends AppController {
 	/**
 	 * @return CakeResponse|null
 	 */
+	public $helpers = array('Lib');
 	public function login(){
 		if($this->Auth->login()){
 			return $this->redirect($this->Auth->redirectUrl());
@@ -36,8 +37,94 @@ class StaffsController extends AppController {
  * @return void
  */
 	public function index() {
-		$this->Staff->recursive = 0;
-		$this->set('staffs', $this->Paginator->paginate());
+//		$this->Staff->recursive = 0;
+//		$this->set('staffs', $this->Paginator->paginate());
+		$bills = $this->Staff->Bill->find('all');
+		$timeNow = time();
+		$dayNow = date('d/m/Y', $timeNow);
+		$monthNow = date('m/Y', $timeNow);
+		$dayInMonth = date('d', $timeNow);
+		$productsDay = array();
+		$productsMonth = array();
+//		debug($monthNow);die;
+		for ($i = 1; $i <= intval($dayInMonth); $i++){
+			$productsMonth[$i] = array();
+		}
+
+		foreach ($bills as $key => $item){
+			$time_created = $item['Bill']['created'];
+			$timeConvert = strtotime($time_created);
+			$dayConvert = date('d/m/Y', $timeConvert);
+			$MonthConvert = date('m/Y', $timeConvert);
+			$dayInMonthConvert = date('d', $timeConvert);
+			if($dayNow == $dayConvert){
+				$productsDay[] = $item['Detail'];
+			}
+			if($monthNow == $MonthConvert){
+				$productsMonth[$dayInMonthConvert][] = $item['Detail'];
+			}
+		}
+//		debug($productsMonth);die;
+		$dataDay = array();
+		foreach ($productsDay as $product) {
+			foreach ($product as $item){
+				$dataDay[$item['product_id']]['id'] = $item['product_id'];
+				$dataDay[$item['product_id']]['name'] = $this->Staff->Bill->Detail->Product->findById($item['product_id'])['Product']['product_name'];
+				if(isset($dataDay[$item['product_id']]['number']) && isset($dataDay[$item['product_id']]['price'])){
+
+					$dataDay[$item['product_id']]['number'] += intval($item['number']);
+					$dataDay[$item['product_id']]['price'] += intval($item['single_price']);
+				}else{
+					if(!isset($dataDay[$item['product_id']]['number'])){
+						$dataDay[$item['product_id']]['number'] = intval($item['number']);
+					}
+					if(!isset($dataDay[$item['product_id']]['price'])){
+						$dataDay[$item['product_id']]['price'] = intval($item['single_price']);
+					}
+				}
+
+			}
+		}
+		$dataMonth = array();
+		$dataTotalMonth = array();
+		foreach ($productsMonth as $key => $bills){
+			$dataMonth[$key]['price'] = 0;
+			$dataMonth[$key]['number'] = 0;
+
+			foreach ($bills as $products){
+				if(!empty($products)){
+					foreach ($products as $product){
+						$dataMonth[$key]['price'] += intval($product['single_price']);
+						$dataMonth[$key]['number'] += intval($product['number']);
+
+						$dataTotalMonth[$product['product_id']]['id'] = $product['product_id'];
+						$dataTotalMonth[$product['product_id']]['name'] = $this->Staff->Bill->Detail->Product->findById($product['product_id'])['Product']['product_name'];
+						if(isset($dataTotalMonth[$product['product_id']]['number']) && isset($dataTotalMonth[$product['product_id']]['price'])){
+
+							$dataTotalMonth[$product['product_id']]['number'] += intval($product['number']);
+							$dataTotalMonth[$product['product_id']]['price'] += intval($product['single_price']);
+						}else{
+							if(!isset($dataTotalMonth[$product['product_id']]['number'])){
+								$dataTotalMonth[$product['product_id']]['number'] = intval($product['number']);
+							}
+							if(!isset($dataTotalMonth[$product['product_id']]['price'])){
+								$dataTotalMonth[$product['product_id']]['price'] = intval($product['single_price']);
+							}
+						}
+					}
+				}
+			}
+		}
+//		debug($dataDay);die;
+		$data = array(
+			'dataDay' => $dataDay,
+			'dataMonth' => $dataMonth,
+			'dataTotalMonth' => $dataTotalMonth,
+		);
+		$this->set('data', $data);
+//		debug($data);die;
+
+//		debug(date('d/m/Y', $timeStampe));die;
 	}
 
 /**

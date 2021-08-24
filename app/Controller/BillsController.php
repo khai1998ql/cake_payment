@@ -31,11 +31,22 @@
 								'discount' => $detail['discount'],
 								'single_price' => $detail['single_price'],
 							);
-
+							$product_detail = $this->Bill->Detail->Product->query("SELECT * FROM `products` WHERE id = " . $detail['id'])[0]['products'];
+//							debug($product_detail);die;
+							// Thêm bill detail
 							$this->Bill->Detail->create();
 							$this->Bill->Detail->save($data_detail);
+
+							// Cập nhật products
+//							$this->Bill->Detail->Product->findById($detail['id']);
+							$this->Bill->Detail->Product->id = $detail['id'];
+							$this->Bill->Detail->Product->save(array(
+								'number' => intval($product_detail['number']) - intval($detail['product_qty']),
+								'sold' => intval($product_detail['sold']) + intval($detail['product_qty']),
+							));
 						}
 						// Xứ lý xuất excel
+
 						$this->set('data', $data);
 						$this->layout = null;
 						$this->render('export_excel');
