@@ -7,9 +7,9 @@
 		<div style="display: inline;float: right; margin-left: 5px;" class=""><?php echo $this->HTML->link('Thêm mới đơn hàng',
 				array('controller' => 'bills', 'action' => 'index'),
 				array('class' => 'btn btn-success')); ?><br /></div>
-		<div style="display: inline;float: right" class=""><?php echo $this->HTML->link('Xuất Excel',
-				array('controller' => 'bills', 'view' => 'index', '?xuat_excel=1'),
-				array('class' => 'btn btn-primary')); ?><br /></div>
+<!--		<div style="display: inline;float: right" class="">--><?php //echo $this->HTML->link('Xuất Excel',
+//				array('controller' => 'bills', 'action' => 'index', '?xuat_excel=1'),
+//				array('class' => 'btn btn-primary')); ?><!--<br /></div>-->
 	</div>
 	<div class="mt-5">
 

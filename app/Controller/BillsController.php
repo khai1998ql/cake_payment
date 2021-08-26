@@ -150,6 +150,23 @@
 				$detail['Detail'][$key]['product'] = $product[0]['products'];
 			}
 			$this->set('detail', $detail);
+			if(isset($this->request->query['xuat_excel']) && $this->request->query['xuat_excel']){
+				// Xứ lý xuất excel
+				$this->layout = null;
+				$this->render('export_excel_detail');
+//				$this->PhpExcel->freeMemory();
+			}
+		}
+		public function delete($id){
+			$bill = $this->Bill->findById($id);
+			foreach ($bill['Detail'] as $key => $item){
+				$this->Bill->Detail->id = $item['id'];
+				$this->Bill->Detail->delete();
+			}
+			$this->Bill->id = $id;
+			$this->Bill->delete();
+			$this->Session->setFlash('Xóa đơn hàng thành công');
+			$this->redirect('view');
 		}
 	}
 ?>

@@ -45,6 +45,11 @@ class PhpExcelHelper extends AppHelper {
 	 *
 	 * @return $this for method chaining
 	 */
+//	public function getRow() {
+//		$currentRow = $this->_tableParams['header_row'] + $this->_tableParams['row_count'];
+//		return $currentRow;
+//	}
+
 	public function createWorksheet() {
 		// load vendor classes
 		App::import('Vendor', 'PhpExcel.PHPExcel');

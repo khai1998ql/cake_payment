@@ -8,7 +8,9 @@
 		<div style="display: inline;float: right; margin-left: 5px;" class=""><?php echo $this->HTML->link('Quay lại',
 				array('controller' => 'bills', 'action' => 'view'),
 				array('class' => 'btn btn-danger')); ?><br /></div>
-
+		<div style="display: inline;float: right" class=""><?php echo $this->HTML->link('Xuất Excel',
+					array('controller' => 'bills', 'action' => 'detail', $detail['Bill']['id'], '?xuat_excel=1'),
+					array('class' => 'btn btn-primary')); ?><br /></div>
 	</div>
 	<div class="mt-5 mb-5">
 		<ol class="list-group list-group-numbered">
